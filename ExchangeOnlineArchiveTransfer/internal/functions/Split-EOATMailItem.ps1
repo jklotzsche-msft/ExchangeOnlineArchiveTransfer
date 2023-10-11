@@ -32,6 +32,7 @@
     #>
     [CmdletBinding()]
     param(
+        [OutputType([System.Collections.Generic.List[PSCustomObject]])]
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [PSCustomObject[]]
         $MailItems,

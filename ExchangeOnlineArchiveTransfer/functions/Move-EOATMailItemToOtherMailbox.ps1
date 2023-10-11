@@ -204,10 +204,12 @@
             # Ask the script user if we should continue, if the target folder is empty
             $continue = $false
             while ($continue -eq $false) {
+                $continuationPrompt = ""
                 if($CheckTargetFolderEmpty) {
-                    Write-Host "Target folder '$TargetFolder' in mailbox '$TargetMailbox' is empty."
+                    $continuationPrompt += "Target folder '$TargetFolder' in mailbox '$TargetMailbox' is empty.`n"
                 }
-                $continue = Read-Host -Prompt 'Do you want to continue with the next batch? (Y/N)'
+                $continuationPrompt += 'Do you want to continue with the next batch? (Y/N)'
+                $continue = Read-Host -Prompt $continuationPrompt
                 if ($continue -eq 'Y') {
                     $continue = $true
                 }

@@ -14,26 +14,24 @@
     This parameter defines the mail folders, from which the function gets the mail items.
     You can use the function 'Get-EOATMailFolder' to get a list of mail folders.
     
-    .PARAMETER ResultSize
+    .PARAMETER ResultSizePerFolder
     Integer value. Default value is null.
     This parameter defines the number of mail items, which are returned by the function per provided folder.
     So, if you provide three mail folders, the function returns 3000000 mail items.
-    If you provide three mail folders and set the ResultSize to 100, the function returns 300 mail items.
+    If you provide three mail folders and set the ResultSizePerFolder to 100, the function returns 300 mail items.
     If you do not provide a value for this parameter, the function returns all mail items per folder.
     
     .PARAMETER StartDate
     DateTime value. Default value is $null.
     This parameter defines the start date of the mail items, which are returned by the function.
     The start date is defined as the "received date" of the mail item.
-    The function will search for mails in the provided folder(s) based on the provided ResultSize first.
-    Afterwards, it will check the start date and end date of the returned mails and return only the mails, which are in the date range.
+    The function will search for mails in the provided folder(s) based on the provided ResultSizePerFolder and start date.
 
     .PARAMETER EndDate
     DateTime value. Default value is $null.
     This parameter defines the end date of the mail items, which are returned by the function.
     The end date is defined as the "received date" of the mail item.
-    The function will search for mails in the provided folder(s) based on the provided ResultSize first.
-    Afterwards, it will check the start date and end date of the returned mails and return only the mails, which are in the date range.
+    The function will search for mails in the provided folder(s) based on the provided ResultSizePerFolder and end date.
 
     .PARAMETER Service
     ExchangeService object. Default value is the script variable $script:EwsService.
@@ -53,7 +51,7 @@
     .EXAMPLE
     Get-EOATMailFolder -SearchBase ArchiveMsgFolderRoot -ShowGui | Get-EOATMailItem -ResultSize 150
 
-    This example returns a list of mail items from the mail folders selected in the GUI window. The number of returned mail items is 150.
+    This example returns a list of mail items from the mail folders selected in the GUI window. The number of returned mail items is 150 per provided folder.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Default')]
     param (
@@ -66,7 +64,7 @@
         [Parameter(ParameterSetName = 'Default')]
         [Parameter(ParameterSetName = 'DateRange')]
         [Int32]
-        $ResultSize,
+        $ResultSizePerFolder,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'DateRange')]
         [datetime]
@@ -103,12 +101,18 @@
     }
 
     Process {
+        # Prepare return value
+        $returnValue = [System.Collections.Generic.List[Object]]::new()
+
         # List mail items in selected folders
         foreach ($mailFolder in $MailFolders) {
+            # prepare variable to count items in this folder
+            $returnedItemsInThisFolder = 0
+
             # Define SubFolderId
             $SubFolderId = New-Object -TypeName Microsoft.Exchange.WebServices.Data.FolderId($mailFolder.id)
             
-            #Define ItemView to retrieve number of items defined in $ResultSize
+            #Define ItemView to retrieve items in pages
             $pageSize = 1000
             $offSet = 0
             $ivItemView = New-Object -TypeName Microsoft.Exchange.WebServices.Data.ItemView(($pageSize + 1), $offSet)
@@ -117,20 +121,21 @@
 
             # Prepare Searchfilter, if StartDate and EndDate were provided
             if ($StartDate -and $EndDate) {
-                $searchQuery = "received:>=$($StartDate.ToString("MM/dd/yyyy")) AND received:<=$($EndDate.ToString("MM/dd/yyyy"))" 
+                $searchQuery = "received:>=$($StartDate.ToString("MM/dd/yyyy")) AND received:<=$($EndDate.ToString("MM/dd/yyyy"))"
             }
 
             # Get items from folder and add them to list
-            $returnValue = [System.Collections.Generic.List[Object]]::new()
+            $continueLoop = $true
             do {
                 if ($StartDate -and $EndDate) {
                     $foundItems = $Service.FindItems($SubFolderId, $searchQuery, $ivItemView)
                 }
                 else {
                     $foundItems = $Service.FindItems($SubFolderId, $ivItemView)
-                }                
+                }
 
                 # Check if more items are available
+                $continueLoop = $foundItems.MoreAvailable
                 if ($foundItems.MoreAvailable) {
                     $ivItemView.Offset += $pageSize
                 }
@@ -138,11 +143,22 @@
                 foreach ($foundItem in $foundItems) {
                     # Add item to list
                     $returnValue.Add($foundItem)
+                    $returnedItemsInThisFolder++
+                    
+                    if($returnedItemsInThisFolder -eq $ResultSizePerFolder) {
+                        Write-Verbose -Message "ResultSize of $ResultSizePerFolder items reached. Ending search."
+                        
+                        # end outer do-while loop
+                        $continueLoop = $false
+                        
+                        # end inner foreach loop
+                        break
+                    }
                 }
 
                 Write-Verbose -Message "Items Count: $($foundItems.Items.Count), Offset: $($ivItemView.Offset)"
 
-            } while ($foundItems.MoreAvailable)
+            } while ($continueLoop)
         }
 
         # return the selected items as list
