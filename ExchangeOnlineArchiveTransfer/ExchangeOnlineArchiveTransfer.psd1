@@ -25,7 +25,7 @@ Copyright = '(c) Jamy Klotzsche. All rights reserved.'
 Description = 'Copy or move items of a Exchange Online mailbox (primary mailbox AND archive mailbox possible) to any folder of any target mailbox in your tenant. Learn more about this project at https://github.com/jklotzsche-msft/ExchangeOnlineArchiveTransfer'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '7.3'
+PowerShellVersion = '7.2'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
