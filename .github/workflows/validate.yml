@@ -9,4 +9,4 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install Prerequisites
       run: .\build\vsts-prerequisites.ps1
-      shell: powershell
+      shell: pwsh

@@ -158,7 +158,7 @@
                 }
                 Write-Progress @progressProps
                 # Move mail item
-                $mailItem.Move($targetFolderId.Id)
+                $null = $mailItem.Move($targetFolderId.Id)
 
                 if ($LogEnabled) {
                     # Export log info to CSV file
