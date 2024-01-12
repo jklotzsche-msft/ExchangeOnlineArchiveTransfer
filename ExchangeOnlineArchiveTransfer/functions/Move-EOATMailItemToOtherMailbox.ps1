@@ -162,7 +162,7 @@
 
                 if ($LogEnabled) {
                     # Export log info to CSV file
-                    @{
+                    [PSCustomObject]@{
                         SourceMailbox      = $script:SourceMailbox
                         # SourceFolder     = '' # SourceFolder Name is not available on this object. Will be ignored for now for performance reasons. SourceFolderId can be used to get the SourceFolder Name using Get-EOATMailFolder.
                         SourceFolderId     = $mailItem.ParentFolderId.UniqueId
