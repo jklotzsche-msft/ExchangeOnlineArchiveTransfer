@@ -157,12 +157,40 @@
                     PercentComplete = (($mailItemBatch.IndexOf($mailItem) + 1) / $mailItemBatch.Count * 100)
                 }
                 Write-Progress @progressProps
-                # Copy mail item
-                $null = $mailItem.Copy($targetFolderId.Id)
+                
+                $retryCount = 0
+                $copySuccess = $false
+                do {
+                    # If the method fails three times with the error "The server cannot service this request right now. Try again later.", the function will return an error
+                    if($retryCount -eq 3) {
+                        Write-Error -Message "The method failed with error 'Try again later' three times. The function will return an error."
+                        return
+                    }
+
+                    try {
+                        # Copy mail item
+                        $null = $mailItem.Copy($targetFolderId.Id)
+                    }
+                    catch {
+                        if ($_.Exception.Message -like "*The server cannot service this request right now. Try again later.*") { # If the error message contains "The server cannot service this request right now. Try again later.", we will wait and retry the method
+                            $backOffMilliseconds = $_.Exception.InnerException.BackOffMilliseconds + 100
+                            Write-Warning -Message "The method failed with error '$($_.Exception.Message)'. Waiting $backOffMilliseconds milliseconds before retrying the method."
+                            Start-Sleep -Milliseconds $backOffMilliseconds
+                            $retryCount++
+                            continue
+                        }
+                        else { # If the error message does not contain "The server cannot service this request right now. Try again later.", we will write the error message and stack trace to the console and return
+                            throw $_
+                        }
+                    }
+
+                    # If the method was successful, we will set $copySuccess to $true
+                    $copySuccess = $true
+                } while (-not $copySuccess)
 
                 if ($LogEnabled) {
                     # Export log info to CSV file
-                    [PSCustomObject]@{
+                    @{
                         SourceMailbox      = $script:SourceMailbox
                         # SourceFolder     = '' # SourceFolder Name is not available on this object. Will be ignored for now for performance reasons. SourceFolderId can be used to get the SourceFolder Name using Get-EOATMailFolder.
                         SourceFolderId     = $mailItem.ParentFolderId.UniqueId
