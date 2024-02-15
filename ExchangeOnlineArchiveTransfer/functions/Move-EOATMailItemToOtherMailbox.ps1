@@ -189,8 +189,8 @@
                 } while (-not $moveSuccess)
 
                 if ($LogEnabled) {
-                    # Export log info to CSV file
-                    @{
+                    # Create log object
+                    $logObject = @{
                         SourceMailbox      = $script:SourceMailbox
                         # SourceFolder     = '' # SourceFolder Name is not available on this object. Will be ignored for now for performance reasons. SourceFolderId can be used to get the SourceFolder Name using Get-EOATMailFolder.
                         SourceFolderId     = $mailItem.ParentFolderId.UniqueId
@@ -199,11 +199,19 @@
                         TargetFolderId     = $targetFolderId.Id
                         SourceMailItemId   = $mailItem.Id.UniqueId
                         Sender             = $mailItem.From.Address
-                        Subject            = $mailItem.Subject
+                        Subject            = ''
                         Received           = $mailItem.DateTimeReceived.ToString('yyyy-MM-dd-hh-mm-ss')
                         SizeInMB           = "{0:N2}" -f ($mailItem.Size / 1024 / 1024)
                         CurrentWindowsUser = "$env:USERDOMAIN\$env:USERNAME"
-                    } | Export-Csv -Path $LogFilePath -Append -NoTypeInformation -Encoding utf8 -Delimiter $LogDelimiter
+                    }
+
+                    # If the mail item has a subject, we will add the subject to the log object
+                    if($null -ne $mailItem.Subject -and "" -ne $mailItem.Subject) {
+                        $logObject.Subject = $mailItem.Subject
+                    }
+
+                    # Export log object to CSV file
+                    $logObject | Export-Csv -Path $LogFilePath -Append -NoTypeInformation -Encoding utf8 -Delimiter $LogDelimiter
                 }
             }
 
