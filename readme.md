@@ -11,8 +11,10 @@ This module can also be used to copy and move the contents of a mailbox to a tar
 
 ### Requirements
 
-There is only a single module required to use ExchangeOnlineArchiveTransfer: Azure.Function.Tools
+There is only a single module required to use ExchangeOnlineArchiveTransfer: EntraAuth
 This module is used for the authentication process and will be installed automatically, if it is not already installed.
+
+> **BREAKING CHANGE beginning in Version 1.1.0**: Previously, we used the `Azure.Function.Tools` module for the authentication process. This module is not required anymore. The module `EntraAuth` is now required for the authentication process. This module will be installed automatically, if it is not already installed. The advantage is, that we can utilize the builtin token refresh mechanism of the `EntraAuth` module.
 
 Install the ExchangeOnlineArchiveTransfer module from PowerShell Gallery using the following command:
 
@@ -90,4 +92,22 @@ Get-Help -Name Get-EOATMailFolder -Full
 Get-Help -Name Get-EOATMailItem -Full
 Get-Help -Name Move-EOATMailItemToOtherMailbox -Full
 Get-Help -Name Copy-EOATMailItemToOtherMailbox -Full
+```
+
+## Frequently Asked Questions
+
+### My token expires automatically after about an hour. How can I avoid this?
+
+The `EntraAuth` module has a built-in token refresh mechanism. The token will be refreshed automatically, if it expires.<br>Alternatively, you can use follow the guidance at [Configure token lifetime policies (preview)](https://learn.microsoft.com/en-us/entra/identity-platform/configure-token-lifetimes) to increase the token lifetime. Remember, that this is a preview feature and may not be available in your tenant at the time of writing this.
+
+### Can I authenticate using another method than Device Code Flow?
+
+No, the module only supports the Device Code Flow for authentication.<br>If you want to use another authentication method, you have to modify the module code.<br>Simply download the module from this GitHub repository and modify the `Connect-EOATExchangeWebService` function.<br>Check the documentation of the [EntraAuth module](https://github.com/FriedrichWeinmann/EntraAuth/tree/master) to learn more about the possible authentication methods.
+
+### How can I get the latest version of this module?
+
+You can get the latest version of this module from PowerShell Gallery using the following command:
+
+```powershell
+Update-Module -Name ExchangeOnlineArchiveTransfer
 ```
