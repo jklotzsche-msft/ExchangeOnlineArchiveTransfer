@@ -54,6 +54,7 @@
     This example returns a list of mail items from the mail folders selected in the GUI window. The number of returned mail items is 150 per provided folder.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Default')]
+    [OutputType([System.Collections.Generic.List[Object]])]
     param (
 
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ParameterSetName = 'Default')]

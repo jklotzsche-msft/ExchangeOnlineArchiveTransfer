@@ -4,7 +4,7 @@
 RootModule = 'ExchangeOnlineArchiveTransfer.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.5'
+ModuleVersion = '1.1.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -25,7 +25,7 @@ Copyright = '(c) Jamy Klotzsche. All rights reserved.'
 Description = 'Copy or move items of a Exchange Online mailbox (primary mailbox AND archive mailbox possible) to any folder of any target mailbox in your tenant. Learn more about this project at https://github.com/jklotzsche-msft/ExchangeOnlineArchiveTransfer'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '7.2'
+# PowerShellVersion = '7.2'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -44,7 +44,7 @@ PowerShellVersion = '7.2'
 
 # Modules that must be imported into the global environment prior to importing this module
 RequiredModules = @(
-    'Azure.Function.Tools'
+    'EntraAuth'
 )
 
 # Assemblies that must be loaded prior to importing this module

@@ -36,6 +36,7 @@
     This example returns a list of mail folders from the root folder 'ArchiveMsgFolderRoot'. The number of returned mail folders is 150.
     #>
     [CmdletBinding()]
+    [OutputType([System.Collections.Generic.List[Object]])]
     param (
         [ArgumentCompleter({
                 [Microsoft.Exchange.Webservices.Data.WellKnownFolderName] | Get-Member -Static -MemberType Properties | Select-Object -ExpandProperty Name

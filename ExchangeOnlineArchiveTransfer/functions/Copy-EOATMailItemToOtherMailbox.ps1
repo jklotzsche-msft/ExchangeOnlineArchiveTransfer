@@ -173,13 +173,27 @@
                     }
                     catch {
                         if ($_.Exception.Message -like "*The server cannot service this request right now. Try again later.*") { # If the error message contains "The server cannot service this request right now. Try again later.", we will wait and retry the method
+                            $retryCount++
                             $backOffMilliseconds = $_.Exception.InnerException.BackOffMilliseconds + 100
                             Write-Warning -Message "The method failed with error '$($_.Exception.Message)'. Waiting $backOffMilliseconds milliseconds before retrying the method."
                             Start-Sleep -Milliseconds $backOffMilliseconds
-                            $retryCount++
                             continue
                         }
-                        else { # If the error message does not contain "The server cannot service this request right now. Try again later.", we will write the error message and stack trace to the console and return
+                        elseif ($_.Exception.Message -like "*Unauthorized*") {
+                            $retryCount++
+                            Write-Warning -Message "The method failed with error '$($_.Exception.Message)'. Refreshing token and retrying the method."
+                            # Refresh token
+                            $script:EwsToken.RenewToken()
+
+                            # Reconnect to EWS
+                            $script:EwsService.Credentials = [Microsoft.Exchange.WebServices.Data.OAuthCredentials]$script:EwsToken.AccessToken
+                            Write-Verbose "Starting Autodiscover for $MailboxName"
+                            $script:EwsService.AutodiscoverUrl($MailboxName, { $true }) # use overload with callback
+                            $Service = $script:EwsService
+
+                            continue
+                        }
+                        else { # in other cases, we will throw the error
                             throw $_
                         }
                     }
