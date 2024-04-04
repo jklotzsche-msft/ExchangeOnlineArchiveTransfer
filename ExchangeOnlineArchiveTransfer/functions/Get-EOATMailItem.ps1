@@ -122,7 +122,7 @@
 
             # Prepare Searchfilter, if StartDate and EndDate were provided
             if ($StartDate -and $EndDate) {
-                $searchQuery = "received:>=$($StartDate.ToString("MM/dd/yyyy")) AND received:<=$($EndDate.ToString("MM/dd/yyyy"))"
+                $searchQuery = "received:>={0}/{1}/{2} AND received:<={3}/{4}/{5}" -f $StartDate.Month, $StartDate.Day, $StartDate.Year, $EndDate.Month, $EndDate.Day, $EndDate.Year
             }
 
             # Get items from folder and add them to list
