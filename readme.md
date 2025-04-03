@@ -2,6 +2,8 @@
 
 Copy or move items of a Exchange Online mailbox (primary mailbox AND archive mailbox possible) to any folder of any target mailbox in your tenant.
 
+> **THIS REPOSITORY HAS BEEN ARCHIVED** - Please have a look at [Introducing the Microsoft Graph Export-Import APIs for Exchange in public preview](https://devblogs.microsoft.com/microsoft365dev/introducing-the-microsoft-graph-export-import-apis-for-exchange-in-public-preview/) to learn how to export mail items from an Exchange Online archive mailbox.
+
 ## What this module can do
 
 This module can be used to read the contents of a mailbox and create a list of folders or items (without the actual email body).
